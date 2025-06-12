@@ -4,6 +4,7 @@ import { Navbar } from "./navbar";
 import { SearchFilters } from "./search-filters";
 import configPromise from "@payload-config";
 import { Category } from "@/payload-types";
+import { CustomCategory } from "./types";
 
 const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
   const payload = await getPayload({
@@ -20,12 +21,14 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
         exists: false,
       },
     },
+    sort: "name",
   });
 
-  const formattedData = data.docs.map((doc) => ({
+  const formattedData:  CustomCategory[] = data.docs.map((doc) => ({
     ...doc,
-    subcategories: doc.subcategories?.docs?.map((sub) => ({
-        ...(sub as Category)
+    subcategories: (doc.subcategories?.docs ?? []).map((sub) => ({
+        ...(sub as Category),
+        subcategories: undefined
     }))
   }))
 

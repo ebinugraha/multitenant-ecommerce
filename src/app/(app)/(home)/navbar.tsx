@@ -48,7 +48,7 @@ export const Navbar = () => {
         <nav className="h-20 flex border-b justify-between bg-white">
             <Link href={'/'} className="items-center pl-6 flex">
                 <span className={cn(poppins.className, "font-semibold text-5xl") }>
-                    Home
+                    Nugraha Store
                 </span>
             </Link>
             
