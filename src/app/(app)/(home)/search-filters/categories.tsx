@@ -1,15 +1,15 @@
 "use client";
 
 import { CategoryDropdown } from "./category-dropdown";
-import { CustomCategory } from "../types";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ListFilterIcon } from "lucide-react";
 import { CategorySidebar } from "./category-sidebar";
+import { CategoriesGetManyOutput } from "@/modules/categories/types";
 
 interface CategoriesProps {
-  data: CustomCategory[];
+  data: CategoriesGetManyOutput;
 }
 
 export const Categories = ({ data }: CategoriesProps) => {
@@ -47,7 +47,8 @@ export const Categories = ({ data }: CategoriesProps) => {
         const itemWidth = item.getBoundingClientRect().width;
 
         console.log(
-          `Item width: ${itemWidth}, Total width: ${totalWidth}, Available width: ${avaibleWidth}`)
+          `Item width: ${itemWidth}, Total width: ${totalWidth}, Available width: ${avaibleWidth}`
+        );
 
         if (totalWidth + itemWidth >= avaibleWidth) break;
 
@@ -68,12 +69,7 @@ export const Categories = ({ data }: CategoriesProps) => {
 
   return (
     <div className="relative w-full">
-
-        <CategorySidebar
-            isOpen={isSidebarOpen}
-            onOpenChange={setIsSidebarOpen}
-            data={data}
-        />
+      <CategorySidebar isOpen={isSidebarOpen} onOpenChange={setIsSidebarOpen} />
 
       <div
         ref={measureRef}
@@ -108,15 +104,19 @@ export const Categories = ({ data }: CategoriesProps) => {
         ))}
 
         <div className="shrink-0" ref={viewAllRef}>
-            <Button
+          <Button
             variant={"elevated"}
-                className={cn("h-11 px-4 bg-transparent border-transparent hover:bg-white hover:border-primary text-black",
-            isActiveCategoryHidden && !isAnyHovered && "bg-white border-primary")}
+            className={cn(
+              "h-11 px-4 bg-transparent border-transparent hover:bg-white hover:border-primary text-black",
+              isActiveCategoryHidden &&
+                !isAnyHovered &&
+                "bg-white border-primary"
+            )}
             onClick={() => setIsSidebarOpen(true)}
-            >
-                View All
-                <ListFilterIcon className="ml-2"/>
-            </Button>
+          >
+            View All
+            <ListFilterIcon className="ml-2" />
+          </Button>
         </div>
       </div>
     </div>

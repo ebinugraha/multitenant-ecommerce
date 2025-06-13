@@ -9,29 +9,34 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { CustomCategory } from "../types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
+import { CategoriesGetManyOutput } from "@/modules/categories/types";
 
 interface CategorySidebarProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  data: CustomCategory[];
 }
 
 export const CategorySidebar = ({
   isOpen,
   onOpenChange,
-  data,
 }: CategorySidebarProps) => {
-  const [parentCategories, setParentCategories] = useState<
-    CustomCategory[] | null
-  >(null);
-  const router = useRouter();
-  const [selectedCategory, setSelectedCategory] =
-    useState<CustomCategory | null>(null);
+  const trpc = useTRPC();
+  const { data } = useQuery(trpc.categories.getMany.queryOptions());
+
+  const [parentCategories, setParentCategories] =
+    useState<CategoriesGetManyOutput | null>(null);
+  
+    const [selectedCategory, setSelectedCategory] =
+    useState<CategoriesGetManyOutput[1] | null>(null);
+  
+  
+    const router = useRouter();
 
   const currectCategory = parentCategories ?? data ?? [];
 
@@ -42,15 +47,15 @@ export const CategorySidebar = ({
   };
 
   const handleBackClick = () => {
-    if(parentCategories) {
-        setParentCategories(null)
-        setSelectedCategory(null);
+    if (parentCategories) {
+      setParentCategories(null);
+      setSelectedCategory(null);
     }
-  }
+  };
 
-  const handleCategoryClick = (category: CustomCategory) => {
+  const handleCategoryClick = (category: CategoriesGetManyOutput[1]) => {
     if (category.subcategories && category.subcategories.length > 0) {
-      setParentCategories(category.subcategories as CustomCategory[]);
+      setParentCategories(category.subcategories as CategoriesGetManyOutput);
       setSelectedCategory(category);
     } else {
       if (parentCategories && selectedCategory) {
@@ -67,14 +72,14 @@ export const CategorySidebar = ({
     }
   };
 
-    const backgroundColor = selectedCategory?.color || "#f5f5f5";
+  const backgroundColor = selectedCategory?.color || "#f5f5f5";
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
         className="p-0 transition-none"
-        style={{ backgroundColor  }}
+        style={{ backgroundColor }}
       >
         <SheetHeader className="p-4 border-b">
           <SheetTitle className="text-lg font-semibold">Categories</SheetTitle>
