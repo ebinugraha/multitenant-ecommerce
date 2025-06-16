@@ -1,1 +1,0 @@
-export const cookie_key = "febrian-store-auth-cookie"

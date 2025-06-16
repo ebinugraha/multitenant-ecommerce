@@ -46,10 +46,6 @@ export const Categories = ({ data }: CategoriesProps) => {
       for (const item of items) {
         const itemWidth = item.getBoundingClientRect().width;
 
-        console.log(
-          `Item width: ${itemWidth}, Total width: ${totalWidth}, Available width: ${avaibleWidth}`
-        );
-
         if (totalWidth + itemWidth >= avaibleWidth) break;
 
         totalWidth += itemWidth;

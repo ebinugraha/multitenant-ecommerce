@@ -1,21 +1,21 @@
-import { cookie_key } from "@/constant";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { headers as getHeaders, cookies as getCookies } from "next/headers";
 import { z } from "zod";
 import { loginSchemas, registerSchemas } from "../schemas/schemas";
+import { cookieGenerator, cookieRemover } from "../utils";
 
 export const authRouter = createTRPCRouter({
+  logout: baseProcedure.query(async ({ ctx }) => {
+    await cookieRemover(ctx.db.config.cookiePrefix);
+  }),
+
   session: baseProcedure.query(async ({ ctx }) => {
     const headers = await getHeaders();
     const session = await ctx.db.auth({ headers });
     return session;
   }),
 
-  logout: baseProcedure.mutation(async ({ input, ctx }) => {
-    const cookie = await getCookies();
-    cookie.delete({ name: cookie_key });
-  }),
   register: baseProcedure
     .input(registerSchemas)
     .mutation(async ({ input, ctx }) => {
@@ -61,12 +61,9 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      const cookie = await getCookies();
-      cookie.set({
-        name: cookie_key,
+      cookieGenerator({
+        prefix: ctx.db.config.cookiePrefix,
         value: data.token,
-        path: "/",
-        httpOnly: true,
       });
 
       return data;
@@ -88,13 +85,12 @@ export const authRouter = createTRPCRouter({
       });
     }
 
-    const cookie = await getCookies();
-    cookie.set({
-      name: cookie_key,
+    await cookieGenerator({
+      prefix: ctx.db.config.cookiePrefix,
       value: data.token,
-      path: "/",
-      httpOnly: true,
     });
+
+    console.log(ctx.db.config.cookiePrefix);
 
     return data;
   }),
