@@ -1,6 +1,6 @@
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { SubCategoryMenu } from "./app/(app)/(home)/search-filters/sub-category-menu";
+import { SubCategoryMenu } from "./modules/home/ui/components/search-filters/sub-category-menu";
 
 const categories = [
   {
