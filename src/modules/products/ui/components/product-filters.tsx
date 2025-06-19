@@ -5,6 +5,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { PriceList } from "./price-list";
 import { useProductFilter } from "../../hooks/use-product-filter";
+import { TagFilter } from "./tags-filter";
 
 interface ProductFilterProps {
   className?: string;
@@ -34,6 +35,21 @@ const ProductFilter = ({ className, children, title }: ProductFilterProps) => {
 export const ProductFilters = () => {
   const [filters, setFilters] = useProductFilter();
 
+  const hasAnyFilters = Object.entries(filters).some(([, value]) => {
+    if (typeof value === "string") {
+      return value !== "";
+    }
+    return value !== null;
+  });
+
+  const onClear = () => {
+    setFilters({
+      maxPrice: "",
+      minPrice: "",
+      tags: [],
+    });
+  };
+
   const onChange = (key: keyof typeof filters, value: unknown) => {
     setFilters({
       ...filters,
@@ -45,9 +61,16 @@ export const ProductFilters = () => {
     <div className="border rounded-md bg-white">
       <div className="p-4 border-b  flex items-center justify-between">
         <p className="font-semibold">Filters</p>
-        <button className="underline" onClick={() => {}} type="button">
-          Clear
-        </button>
+
+        {hasAnyFilters && (
+          <button
+            className="underline cursor-pointer"
+            onClick={onClear}
+            type="button"
+          >
+            Clear
+          </button>
+        )}
       </div>
       <ProductFilter title="Price Filter">
         <PriceList
@@ -55,6 +78,14 @@ export const ProductFilters = () => {
           maxPrice={filters.maxPrice}
           onMaxPriceChange={(value) => onChange("maxPrice", value)}
           onMinPriceChange={(value) => onChange("minPrice", value)}
+        />
+      </ProductFilter>
+      <ProductFilter title="Price Filter">
+        <TagFilter
+          values={filters.tags}
+          onChange={(value) => {
+            onChange("tags", value);
+          }}
         />
       </ProductFilter>
     </div>

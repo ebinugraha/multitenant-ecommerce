@@ -1,31 +1,49 @@
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { Category, Product } from "@/payload-types";
 import { z } from "zod";
-import { Where } from "payload";
-import { equal } from "assert";
+import { Sort, Where } from "payload";
+import { sortValues } from "../search-params";
 
 export const productsRouter = createTRPCRouter({
   getMany: baseProcedure
     .input(
       z.object({
         categories: z.string().nullable().optional(),
-        minPrice: z.number().nullable().optional(),
-        maxPrice: z.number().nullable().optional()
+        minPrice: z.string().nullable().optional(),
+        maxPrice: z.string().nullable().optional(),
+        tags: z.array(z.string()).nullable().optional(),
+        sort: z.enum(sortValues).nullable().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
       const where: Where = {};
+      let sort: Sort = "-createdAt";
 
-      if(input.maxPrice){
-        where.price = {
-          less_than_equal: input.maxPrice
-        }
+      if (input.sort === "curated") {
+        sort = "name";
       }
-      
-      if(input.minPrice){
+
+      if (input.sort === "newest") {
+        sort = "+createdAt";
+      }
+
+      if (input.sort === "oldest") {
+        sort = "-createdAt";
+      }
+
+      if (input.maxPrice && input.minPrice) {
         where.price = {
-          greater_than_equal: input.minPrice
-        }
+          less_than: input.maxPrice,
+          greater_than: input.minPrice,
+        };
+      } else if (input.maxPrice) {
+        where.price = {
+          less_than_equal: input.maxPrice,
+        };
+      } else if (input.minPrice) {
+        where.price = {
+          greater_than_equal: input.minPrice,
+        };
       }
 
       if (input.categories) {
@@ -64,11 +82,17 @@ export const productsRouter = createTRPCRouter({
         // mencari kecocokan category.slug
       }
 
+      if (input.tags && input.tags.length > 0) {
+        where["tags.name"] = {
+          in: input.tags,
+        };
+      }
+
       const data = await ctx.db.find({
         collection: "Products",
-        sort: "name",
         depth: 1, //populate image and category
         where,
+        sort,
       });
 
       return data;
