@@ -13,8 +13,6 @@ export const cookieGenerator = async ({ prefix, value }: Props) => {
     path: "/",
     httpOnly: true,
   });
-
-  console.log(cookies);
 };
 
 export const cookieRemover = async (prefix: string) => {
