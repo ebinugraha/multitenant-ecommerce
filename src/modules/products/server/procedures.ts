@@ -9,10 +9,24 @@ export const productsRouter = createTRPCRouter({
     .input(
       z.object({
         categories: z.string().nullable().optional(),
+        minPrice: z.number().nullable().optional(),
+        maxPrice: z.number().nullable().optional()
       })
     )
     .query(async ({ ctx, input }) => {
       const where: Where = {};
+
+      if(input.maxPrice){
+        where.price = {
+          less_than_equal: input.maxPrice
+        }
+      }
+      
+      if(input.minPrice){
+        where.price = {
+          greater_than_equal: input.minPrice
+        }
+      }
 
       if (input.categories) {
         const categoriesData = await ctx.db.find({
@@ -42,12 +56,12 @@ export const productsRouter = createTRPCRouter({
           subCategoriesSlug.push(
             ...parentCategories.subcategories.map((sub) => sub.slug)
           );
+          where["category.slug"] = {
+            in: [parentCategories.slug, ...subCategoriesSlug],
+          };
         }
 
         // mencari kecocokan category.slug
-        where["category.slug"] = {
-          in: [parentCategories.slug, ...subCategoriesSlug],
-        };
       }
 
       const data = await ctx.db.find({
